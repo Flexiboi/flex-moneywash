@@ -1,6 +1,7 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 local entered, machineid, hasmachine, startwash, iswashing = false, 0, false, false, false
 local totaltTimer, washtimer = Config.TotalWashTime, 0
+local enteredlocation = 1
 
 function loadAnimDict(dict)
     while (not HasAnimDictLoaded(dict)) do
@@ -85,26 +86,51 @@ CreateThread(function()
         Citizen.Wait(1)
         local ped = PlayerPedId()
         local pos = GetEntityCoords(ped)
-        local enterloc = #(Config.tp.enter - pos)
         local leaveloc = #(Config.tp.leave - pos)
-        if enterloc < Config.ShowEnterDistance then
-            QBCore.Functions.DrawText3D(Config.tp.enter.x, Config.tp.enter.y, Config.tp.enter.z, '[~o~E~w~]'..Lang:t("info.enterloc"))
-            if IsControlJustReleased(0, 38) then
-                enterAnim()
-                teleport(ped, Config.tp.leave.x, Config.tp.leave.y, Config.tp.leave.z+0.5, 0)
-                enter()
-            end
-        end
         if leaveloc < 3 then
             QBCore.Functions.DrawText3D(Config.tp.leave.x, Config.tp.leave.y, Config.tp.leave.z, '[~o~E~w~]'..Lang:t("info.leaveloc"))
             if IsControlJustReleased(0, 38) then
                 enterAnim()
-                teleport(ped, Config.tp.enter.x, Config.tp.enter.y, Config.tp.enter.z, 0)
+                teleport(ped, Config.tp.enter[enteredlocation].x, Config.tp.enter[enteredlocation].y, Config.tp.enter[enteredlocation].z, 0)
                 entered = false
             end
         end
     end
 end)
+
+for k, loc in pairs(Config.tp.enter) do
+
+    EnterZones[k] = BoxZone:Create(loc, 3.0, 3.0, {
+        name = 'enterzone'..k,
+        useZ = true,
+        debugPoly = Config.Debug
+    })
+
+    EnterZones[k]:onPlayerInOut(function(isPointInside, point)
+        isInEnterZone = isPointInside
+        if isPointInside then
+            exports['qb-core']:DrawText('[E] '..Lang:t("info.leaveloc"), 'left')
+            CreateThread(function()
+                while isInEnterZone do
+                    local ped = PlayerPedId()
+                    local pos = GetEntityCoords(ped)
+                    if IsControlJustReleased(0, 38) then
+                        exports['qb-core']:KeyPressed()
+                        exports['qb-core']:HideText()
+                        enteredlocation = k
+                        enterAnim()
+                        teleport(ped, Config.tp.leave.x, Config.tp.leave.y, Config.tp.leave.z+0.5, 0)
+                        enter()
+                        break
+                    end
+                    Wait(0)
+                end
+            end)
+        else
+            exports['qb-core']:HideText()
+        end
+    end)
+end
 
 function enter()
     entered = true
