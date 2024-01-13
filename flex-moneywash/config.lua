@@ -9,9 +9,13 @@ Config.TotalWashTime = 120 --seconds
 Config.MaxWashPerCoint = 4
 
 Config.ShowEnterDistance = 2
+
 Config.tp = {
-    enter = vector3(636.48, 2785.78, 42.00),   
-    leave = vector3(1138.06, -3199.02, -39.67)
+    enter =  {
+        [1] = vector3(636.48, 2785.78, 42.00),
+        [2] = vector3(-1069.62, -2083.52, 14.38),    
+    },
+    leave = vector3(1073.0, -3102.49, -39.0)
 }
 
 Config.washLocations = {
