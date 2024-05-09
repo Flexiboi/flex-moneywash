@@ -2,6 +2,7 @@ local QBCore = exports['qb-core']:GetCoreObject()
 local entered, machineid, hasmachine, startwash, iswashing = false, 0, false, false, false
 local totaltTimer, washtimer = Config.TotalWashTime, 0
 local enteredlocation = 1
+local EnterZones = {}
 
 function loadAnimDict(dict)
     while (not HasAnimDictLoaded(dict)) do
